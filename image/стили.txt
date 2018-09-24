@@ -1,0 +1,17 @@
+меню
+
+  font-size: 14px
+  font-family: "PlayfairDisplay"
+  color: rgb(98, 98, 98)
+серая секция
+  #f0f0f0
+
+маленький подзаголовок
+  font-size: 14px
+  font-family: "Ubuntu"
+  color: rgb(180, 173, 158)
+
+большой загоровок 
+  font-size: 30px
+  font-family: "PlayfairDisplay"
+  color: rgb(98, 98, 98)
