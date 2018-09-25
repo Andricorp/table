@@ -62,17 +62,12 @@ function jsonPost(url, method)
         
         })
       }
-    // search.onchange =  function(){
-    //     let searchV = search.value
-    //     console.log('vjv',searchV);
-    // }
-    
-    // var send = document.getElementById('send');//инпут "отправить"
-    // var table = document.getElementById('tab');//инпут "отправить"
-    // var table = document.getElementsByTagName('section');//блок родитель для дивов-сообщений. Вернет массив (просто лень было дописывать id  к section)
 
-    send.addEventListener('click', function(){
-        let searchV = search.value
+
+
+
+function Get (searchV = search.value){
+    
 
         jsonPost("http://api.tvmaze.com/search/shows?q="+searchV, 'GET')
         .then(get=>{
@@ -125,6 +120,66 @@ function jsonPost(url, method)
             text.appendChild(table);
 
         })
+}
+
+
+Get('girls')
+
+    send.addEventListener('click', function(){
+        Get()
+        // let searchV = search.value
+
+        // jsonPost("http://api.tvmaze.com/search/shows?q="+searchV, 'GET')
+        // .then(get=>{
+        //     if(!get.length){
+        //         console.log('NO DATA');
+        //         let err = document.createElement('h1');
+        //         err.innerHTML = "По данному запросу нет данных"
+        //         text.appendChild(err)
+        //     }
+        //     let table = document.createElement('table');
+
+        //     get.forEach((el, index) => {
+        //         console.log('el ',el);
+        //         console.log('show',el.show);
+        //         //прописать заголовок таблицы
+
+        //         let tr = document.createElement('tr');
+        //     // let headTrs = document.createElement('tr');
+                
+        //     if(index == 0) {
+        //         var headTrs = document.createElement('tr');
+        //         table.appendChild(headTrs)
+        //     }
+    
+        //         for(key in el.show){
+        //             let val = el.show[key];
+
+        //             if(key == 'name' || key == 'language' || key == 'genres' || key == 'status' || key == 'rating'){
+        //                 if(index == 0){
+        //                     console.log('first th',el.show);
+        //                     let th = document.createElement('th');
+        //                     th.innerHTML =  key.toUpperCase();
+        //                     headTrs.appendChild(th);
+        //                 }
+        //                 let td = document.createElement('td');
+        //                 console.log('elem',key); 
+        //                 td.innerHTML =  val;
+        //                 tr.appendChild(td);
+                        
+                        
+                    
+        //             }
+
+                    
+                
+        //         }
+
+        //         table.appendChild(tr);
+        //     });
+        //     text.appendChild(table);
+
+        // })
     });
 
 // function mass(get){
