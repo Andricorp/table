@@ -147,7 +147,7 @@ nav li{
 }
 nav li a{
 margin:auto;
-padding:70px 20% 70px 20%;
+/* padding:70px 20% 70px 20%; */
   display: block;
   transition: 0.6s;
   text-transform:uppercase;
@@ -156,10 +156,14 @@ font-family: "Playfair Display";
 color: rgb(98, 98, 98);
 }
 
-
+p{
+  cursor: pointer;
+border: none;
+  border-bottom: 2px solid  #f8fffe;
+}
 
 p, h2, h3, img{
-  padding: 20px 0% 0% 0% ;
+  padding: 0px 0px 5px 5px;
   color:#606060;
 }
 h2{
@@ -186,8 +190,8 @@ text-transform: uppercase;
 /* padding:50px 0px 0px 0px; */
 }
 p, ul{
-font-size: 20px;
-color:#7D7D7D;
+font-size: 15px;
+/* color:#7D7D7D; */
 }
 
 .art{
