@@ -1,6 +1,8 @@
 let send = document.getElementById('get')
 let search = document.getElementById('search')
+let variants = document.getElementById('variants')
 let text = document.getElementById('text')
+// let variant = document.createElement('div')
 
 
 
@@ -30,13 +32,47 @@ function jsonPost(url, method)
 
     }
 
+
+    // search.addEventListener('change', function(){
+    //     let searchV = search.value
+    //     console.log('vjv',searchV);
+    // })
+    let i =0
+    let prev = '';
+    search.oninput = function() {
+        let searchV = search.value
+        console.log('vjv',searchV);
+        jsonPost("http://api.tvmaze.com/search/shows?q="+searchV, 'GET')
+        .then(get=>{
+            // if(i>0){
+                console.log(prev); prev.innerHTML = ""
+            // }
+            variant = document.createElement('div')
+            get.forEach((el, index) => {
+                console.log(el.show.name); 
+                let p = document.createElement('p')
+                p.innerHTML = el.show.name;
+                variant.appendChild(p)
+                if(index>5)return
+            })
+            variants.appendChild(variant)
+
+            prev = variant
+
+        
+        })
+      }
+    // search.onchange =  function(){
+    //     let searchV = search.value
+    //     console.log('vjv',searchV);
+    // }
     
     // var send = document.getElementById('send');//инпут "отправить"
     // var table = document.getElementById('tab');//инпут "отправить"
     // var table = document.getElementsByTagName('section');//блок родитель для дивов-сообщений. Вернет массив (просто лень было дописывать id  к section)
 
     send.addEventListener('click', function(){
-        searchV = search.value
+        let searchV = search.value
 
         jsonPost("http://api.tvmaze.com/search/shows?q="+searchV, 'GET')
         .then(get=>{
