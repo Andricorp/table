@@ -21,32 +21,16 @@ search.addEventListener('input', function(){
     autocomplete()
 })
 
-
-function jsonGet(url, method)
-    {
-        return new Promise((resolve, reject) => {
-            var xhr = new XMLHttpRequest();   
-            xhr.onerror = () => reject(new Error('jsonGet failed'))
-            xhr.open(method, url, true);
-            xhr.send()
-
-            xhr.onreadystatechange = () => {
-                if (xhr.readyState == XMLHttpRequest.DONE && (xhr.status == 200 )){
-                    resolve(JSON.parse(xhr.responseText))
-                }
-                else if (xhr.status != 200 ){
-                    reject(new Error('status is not 200'))
-                }
-            }
-        })
-
-    }
+window.onclick=()=>autocompleteBlock.innerHTML = ""
+async function jsonFetch(url){
+    let res = await fetch(url)
+    let data = await res.json();
+    return data
+}
 
 
-function autocomplete(searchV = search.value){
-
-    jsonGet("http://api.tvmaze.com/search/shows?q="+searchV, 'GET')
-    .then(get=>{
+async function autocomplete(searchV = search.value){
+    let get = await jsonFetch("http://api.tvmaze.com/search/shows?q="+searchV)
         prev.innerHTML = ""
         get.forEach((el, index) => {
             let p = document.createElement('p')
@@ -67,17 +51,14 @@ function autocomplete(searchV = search.value){
         showBlock.appendChild(autocompleteBlock)
 
         prev = autocompleteBlock
-    })
 }
 
-function parseGet (searchV = search.value){
+async function parseGet (searchV = search.value){
     text.innerHTML = ''
     autocompleteBlock.innerHTML = ''
     search.value = ""
 
-        jsonGet("http://api.tvmaze.com/search/shows?q="+searchV, 'GET')
-        .then(get=>{
-
+    let get = await jsonFetch("http://api.tvmaze.com/search/shows?q="+searchV)
 
             if(!get.length){
                 console.log('NO DATA');
@@ -110,8 +91,6 @@ function parseGet (searchV = search.value){
                 table.appendChild(tr);
             });
             text.appendChild(table);
-
-        })
 }
 
 function createCell(par, val, up=false, child = 'td'){
