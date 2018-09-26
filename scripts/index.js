@@ -1,31 +1,40 @@
 let send = document.getElementById('get')
 let search = document.getElementById('search')
-let variants = document.getElementById('variants')
+let showBlock = document.getElementById('showBlock')
 let text = document.getElementById('text')
-let variant = document.createElement('div')
+let autocompleteBlock = document.createElement('div')
+let prev = '';
+const thValue = new Map()
+
+thValue.set('name').set('language').set('genres').set('status').set('rating')
+autocompleteBlock.style.background='gray';
+autocompleteBlock.style.opacity=0.8;
 
 
+parseGet('girls')
+
+send.addEventListener('click', function(){
+    parseGet()
+});
+
+search.addEventListener('input', function(){
+    autocomplete()
+})
 
 
-
-variant.style.background='gray';
-variant.style.opacity=0.8;
-
-function jsonPost(url, method)
+function jsonGet(url, method)
     {
         return new Promise((resolve, reject) => {
             var xhr = new XMLHttpRequest();   
-            xhr.onerror = () => reject(new Error('jsonPost failed'))
-            //x.setRequestHeader('Content-Type', 'application/json');
+            xhr.onerror = () => reject(new Error('jsonGet failed'))
             xhr.open(method, url, true);
-            // x.send(JSON.stringify(data))
             xhr.send()
 
             xhr.onreadystatechange = () => {
-                if (xhr.readyState == XMLHttpRequest.DONE && xhr.status == 200){
+                if (xhr.readyState == XMLHttpRequest.DONE && (xhr.status == 200 )){
                     resolve(JSON.parse(xhr.responseText))
                 }
-                else if (xhr.status != 200){
+                else if (xhr.status != 200 ){
                     reject(new Error('status is not 200'))
                 }
             }
@@ -34,94 +43,68 @@ function jsonPost(url, method)
     }
 
 
-let prev = '';
-function autocomplite(){    
-    let searchV = search.value
-    console.log('vjv',searchV);
-    jsonPost("http://api.tvmaze.com/search/shows?q="+searchV, 'GET')
+function autocomplete(searchV = search.value){
+
+    jsonGet("http://api.tvmaze.com/search/shows?q="+searchV, 'GET')
     .then(get=>{
-        console.log(prev);
         prev.innerHTML = ""
-        // variant = document.createElement('div')
         get.forEach((el, index) => {
-            console.log(el.show.name); 
             let p = document.createElement('p')
+
             p.style.cursor = 'pointer'
             p.style.color='white'
+
             p.addEventListener('click', function(){
-                // search.value = p.innerHTML
-                // variant.innerHTML='';
-                parseGet()
+                search.value = p.innerHTML
+                autocompleteBlock.innerHTML='';
+                // parseGet()
             })
+            
             p.innerHTML = el.show.name;
-            variant.appendChild(p)
+            autocompleteBlock.appendChild(p)
             if(index>5)return
         })
-        variants.appendChild(variant)
+        showBlock.appendChild(autocompleteBlock)
 
-        prev = variant
+        prev = autocompleteBlock
     })
 }
-typingCounter = 0
-// let typed = []
-search.oninput = function() {
-    // typingCounter++
-
-    // let t = setTimeout((typingCounter)=>typingCounter, 1000)    
-    // if( setTimeout((typingCounter)=>typingCounter, 1000) <typingCounter ){
-        autocomplite()
-    // }
-}
-
-
-
 
 function parseGet (searchV = search.value){
     text.innerHTML = ''
-    variant.innerHTML = ''
+    autocompleteBlock.innerHTML = ''
+    search.value = ""
 
-        jsonPost("http://api.tvmaze.com/search/shows?q="+searchV, 'GET')
+        jsonGet("http://api.tvmaze.com/search/shows?q="+searchV, 'GET')
         .then(get=>{
-            search.value = ""
+
+
             if(!get.length){
                 console.log('NO DATA');
                 let err = document.createElement('h1');
                 err.innerHTML = "По данному запросу нет данных"
                 text.appendChild(err)
             }
+
             let table = document.createElement('table');
 
             get.forEach((el, index) => {
-                console.log('el ',el);
-                console.log('show',el.show);
 
                 let tr = document.createElement('tr');
-            if(index == 0) {
-                var headTrs = document.createElement('tr');
-                table.appendChild(headTrs)
-            }
+                if(index == 0) {
+                    var headTrs = document.createElement('tr');
+                    table.appendChild(headTrs)
+                }
     
                 for(key in el.show){
                     let val = el.show[key];
 
-                    if(key == 'name' || key == 'language' || key == 'genres' || key == 'status' || key == 'rating'){
+                    if(thValue.has(key)){
                         if(index == 0){
-                            console.log('first th',el.show);
-                            let th = document.createElement('th');
-                            th.innerHTML =  key.toUpperCase();
-                            headTrs.appendChild(th);
+                        createCell(headTrs, key, true, 'th')
                         }
-                        let td = document.createElement('td');
-                        console.log('elem',key); 
-                        td.innerHTML =  val;
-                        tr.appendChild(td);
-                        
-                        
-                    
+                        createCell(tr, val)
                     }
-
-                    
-                
                 }
 
                 table.appendChild(tr);
@@ -131,9 +114,14 @@ function parseGet (searchV = search.value){
         })
 }
 
+function createCell(par, val, up=false, child = 'td'){
+    let td = document.createElement(child);
+    if(up){
+        td.innerHTML = val.toUpperCase()
+    }
+    else{
+        td.innerHTML =  val;
+    }
+    par.appendChild(td);
+}
 
-parseGet('girls')
-
-send.addEventListener('click', function(){
-    parseGet()
-});
