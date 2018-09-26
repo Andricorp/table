@@ -18,10 +18,18 @@ send.addEventListener('click', function(){
 });
 
 search.addEventListener('input', function(){
-    autocomplete()
+    if(debounce){
+        clearTimeout(debounce);
+    }
+    var debounce = setTimeout( ()=>{
+        autocomplete();
+        debounce=''   
+    }, 1700
+    )
 })
 
 window.onclick=()=>autocompleteBlock.innerHTML = ""
+
 async function jsonFetch(url){
     let res = await fetch(url)
     let data = await res.json();
@@ -97,6 +105,10 @@ function createCell(par, val, up=false, child = 'td'){
     let td = document.createElement(child);
     if(up){
         td.innerHTML = val.toUpperCase()
+        td.addEventListener('click', function(){
+            console.log('clicked')
+
+        })
     }
     else{
         td.innerHTML =  val;
