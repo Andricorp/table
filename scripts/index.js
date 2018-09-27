@@ -3,10 +3,13 @@ let search = document.getElementById('search')
 let showBlock = document.getElementById('showBlock')
 let text = document.getElementById('text')
 let autocompleteBlock = document.createElement('div')
+let sortVect = document.createElement('div')
 let prev = '';
-const thValue = new Map()
-
-thValue.set('name').set('language').set('genres').set('status').set('rating')
+const thValue = new Map();
+const toSort = new Map();
+let sortNameUp = true;
+thValue.set('name').set('language').set('genres').set('status').set('rating');
+toSort.set('name').set('rating');
 autocompleteBlock.style.background='gray';
 autocompleteBlock.style.opacity=0.8;
 
@@ -61,12 +64,12 @@ async function autocomplete(searchV = search.value){
         prev = autocompleteBlock
 }
 
-async function parseGet (searchV = search.value){
+async function parseGet (searchV = search.value, get){
     text.innerHTML = ''
     autocompleteBlock.innerHTML = ''
     search.value = ""
 
-    let get = await jsonFetch("http://api.tvmaze.com/search/shows?q="+searchV)
+    if(!get) get = await jsonFetch("http://api.tvmaze.com/search/shows?q="+searchV)
 
             if(!get.length){
                 console.log('NO DATA');
@@ -90,9 +93,12 @@ async function parseGet (searchV = search.value){
 
                     if(thValue.has(key)){
                         if(index == 0){
-                        createCell(headTrs, key, true, 'th')
+                            createCell(headTrs, key, get, 'th', searchV)
                         }
-                        createCell(tr, val)
+                        if(key == 'rating'){
+                            createCell(tr, val.average)
+                        }
+                        else createCell(tr, val)
                     }
                 }
 
@@ -101,18 +107,62 @@ async function parseGet (searchV = search.value){
             text.appendChild(table);
 }
 
-function createCell(par, val, up=false, child = 'td'){
+function createCell(par, val='-', data=false, child = 'td', searchV){
     let td = document.createElement(child);
-    if(up){
+    if(data){
         td.innerHTML = val.toUpperCase()
-        td.addEventListener('click', function(){
-            console.log('clicked')
+        if(toSort.has(val)){
+            if(val=='name'){
+                if(sortNameUp){
+                    sortVect.innerHTML='Z'
+                }
+                else{
+                    sortVect.innerHTML='A'
+                }
+                td.appendChild(sortVect)
+            }             
+            function SortData(){
+                if(val=='name'){
+                    if(sortNameUp){
+                        data.sort(compareNumeric)
+                        function compareNumeric(a, b) {
+                            if (a.show.name > b.show.name) return 1;
+                            if (a.show.name < b.show.name) return -1;
+                        }
+                        sortNameUp = false
+                    }
+                    else {
+                        data.reverse()
+                        sortNameUp = true
+                    }
+                    
+                    parseGet(searchV, data)
+                    console.log(data)
+                }
+                else if(val=='rating'){
+                    data.sort(compareNumeric)
+                    function compareNumeric(a, b) {
+                        if (a.show.rating.average > b.show.rating.average) return 1;
+                        if (a.show.rating.average < b.show.rating.average) return -1;
+                    }
+                    parseGet(searchV, data)
 
-        })
+                }
+                // arr.sort
+            }
+            addEvent(SortData)
+        }
+        
     }
     else{
-        td.innerHTML =  val;
+        td.innerHTML =  val;//func to new request
     }
     par.appendChild(td);
+    function addEvent(func){
+        td.addEventListener('click', function(){
+            console.log('clicked')
+            func()
+        })
+    }
 }
 
