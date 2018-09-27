@@ -3,11 +3,13 @@ let search = document.getElementById('search')
 let showBlock = document.getElementById('showBlock')
 let text = document.getElementById('text')
 let autocompleteBlock = document.createElement('div')
-let sortVect = document.createElement('div')
+let sortVectName = document.createElement('div')
+let sortVectRating = document.createElement('div')
 let prev = '';
 const thValue = new Map();
 const toSort = new Map();
 let sortNameUp = true;
+let sortRating = true;
 thValue.set('name').set('language').set('genres').set('status').set('rating');
 toSort.set('name').set('rating');
 autocompleteBlock.style.background='gray';
@@ -93,7 +95,7 @@ async function parseGet (searchV = search.value, get){
 
                     if(thValue.has(key)){
                         if(index == 0){
-                            createCell(headTrs, key, get, 'th', searchV)
+                            createCell(headTrs, key, get, 'th')
                         }
                         if(key == 'rating'){
                             createCell(tr, val.average)
@@ -107,50 +109,59 @@ async function parseGet (searchV = search.value, get){
             text.appendChild(table);
 }
 
-function createCell(par, val='-', data=false, child = 'td', searchV){
+function createCell(par, val='-', data=false, child = 'td'){
     let td = document.createElement(child);
     if(data){
-        td.innerHTML = val.toUpperCase()
+        // td.innerHTML = val.toUpperCase()
+        let head = document.createElement('div')
+        head.innerHTML = val.toUpperCase()
+        td.appendChild(head)
+
         if(toSort.has(val)){
             if(val=='name'){
                 if(sortNameUp){
-                    sortVect.innerHTML='Z'
+                    // sortVectName.innerHTML='Z'
+                    addEvent(
+                        ()=>{
+                            sortVectName.innerHTML=' A-Z'
+                                sortData(val, data, true)
+                            })
+                            sortNameUp = false;
                 }
                 else{
-                    sortVect.innerHTML='A'
-                }
-                td.appendChild(sortVect)
-            }             
-            function SortData(){
-                if(val=='name'){
-                    if(sortNameUp){
-                        data.sort(compareNumeric)
-                        function compareNumeric(a, b) {
-                            if (a.show.name > b.show.name) return 1;
-                            if (a.show.name < b.show.name) return -1;
-                        }
-                        sortNameUp = false
-                    }
-                    else {
-                        data.reverse()
-                        sortNameUp = true
-                    }
-                    
-                    parseGet(searchV, data)
-                    console.log(data)
-                }
-                else if(val=='rating'){
-                    data.sort(compareNumeric)
-                    function compareNumeric(a, b) {
-                        if (a.show.rating.average > b.show.rating.average) return 1;
-                        if (a.show.rating.average < b.show.rating.average) return -1;
-                    }
-                    parseGet(searchV, data)
+                    addEvent(()=>{
+                                sortVectName.innerHTML=' Z-A'
+                                sortData(val, data)
 
+                            })
+                            sortNameUp = true;
                 }
-                // arr.sort
+                // td.appendChild(sortVectName)
+                head.appendChild(sortVectName)
+                
             }
-            addEvent(SortData)
+            if(val=='rating'){
+
+                if(sortRating){
+                    addEvent(
+                        ()=>{
+                    sortVectRating.innerHTML=' V'
+                    sortData(val, data, true)
+
+                        })
+                        sortRating = false;
+                }
+                else{
+                    addEvent(()=>{
+                    sortVectRating.innerHTML=' ^'
+                        sortData(val, data)
+
+                    })
+                    sortRating = true;
+                }
+                // td.appendChild(sortVectRating)
+                head.appendChild(sortVectRating)
+            }    
         }
         
     }
@@ -160,9 +171,27 @@ function createCell(par, val='-', data=false, child = 'td', searchV){
     par.appendChild(td);
     function addEvent(func){
         td.addEventListener('click', function(){
-            console.log('clicked')
             func()
         })
     }
 }
 
+function sortData(val, data, sortHigh=false){
+        if(sortHigh){
+            data.sort(compareNumeric)
+            function compareNumeric(a, b) {
+                if(val=='name'){
+                    if (a.show.name > b.show.name) return 1;
+                    if (a.show.name < b.show.name) return -1;
+                }
+                else {
+                    if (a.show.rating.average > b.show.rating.average) return 1;
+                    if (a.show.rating.average < b.show.rating.average) return -1;
+                }
+            }
+        }
+        else {
+            data.reverse()
+        }
+        parseGet(null, data)
+}

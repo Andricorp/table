@@ -12,7 +12,14 @@ a:hover, a{
   text-decoration: inherit;
 
 }
-
+th>div{
+/*   width:75%; */
+  display:flex;
+/*   justify-content:space-between */
+}
+th>div>div{
+  margin-left: 10px
+}
 header {
   background-color: #FFFFFF;
   position: relative;
@@ -572,4 +579,6 @@ height:420px;
   display:none;
 }
 }
+
+
 
