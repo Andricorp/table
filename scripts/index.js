@@ -10,6 +10,9 @@ const thValue = new Map();
 const toSort = new Map();
 let sortNameUp = true;
 let sortRating = true;
+let modalIsOpen = false;
+let modal = document.createElement('section')
+let img = document.createElement('div');
 
 thValue
   .set("name")
@@ -20,13 +23,25 @@ thValue
 toSort.set("name").set("rating");
 autocompleteBlock.style.background = "gray";
 autocompleteBlock.style.opacity = 0.8;
+document.body.appendChild(modal)
+
 
 init();
 
 function init() {
   parseGet("girls");
-  send.addEventListener("click", function() {
-    parseGet();
+//   send.addEventListener("click", function() {
+    // parseGet();
+//   });
+  search.addEventListener("keydown", function(event) {
+    //   if()
+    if(event.keyCode == 13){
+        // $("#id_of_button").click();
+        parseGet();
+
+        // $(this).val('');
+    }
+    // parseGet();
   });
 
   search.addEventListener("input", function() {
@@ -40,13 +55,15 @@ function init() {
   });
 }
 
-window.onclick = () => (autocompleteBlock.innerHTML = "");
+window.onclick = () => {autocompleteBlock.innerHTML = "", modal.innerHTML = null};
 
 async function jsonFetch(url) {
   let res = await fetch(url);
   let data = await res.json();
   return data;
 }
+
+
 
 async function autocomplete(searchV = search.value) {
   let get = await jsonFetch("http://api.tvmaze.com/search/shows?q=" + searchV);
@@ -58,9 +75,18 @@ async function autocomplete(searchV = search.value) {
     p.style.color = "white";
 
     p.addEventListener("click", function() {
-      // search.value = p.innerHTML
-      // autocompleteBlock.innerHTML='';
-      parseGet();
+      parseGet(p.innerHTML);
+      search.style.background = null
+    });
+    p.addEventListener("mouseover", function() {
+        search.value = p.innerHTML
+        search.style.background = 'yellow'
+        p.style.background = 'black'
+    });
+    p.addEventListener("mouseout", function() {
+        search.style.background = null
+        p.style.background = null
+        search.value = null
     });
 
     p.innerHTML = el.show.name;
@@ -75,7 +101,7 @@ async function autocomplete(searchV = search.value) {
 async function parseGet(searchV = search.value, get) {
   text.innerHTML = "";
   autocompleteBlock.innerHTML = "";
-  search.value = "";
+//   search.value = "";
 
   if (!get)
     get = await jsonFetch("http://api.tvmaze.com/search/shows?q=" + searchV);
@@ -96,17 +122,17 @@ async function parseGet(searchV = search.value, get) {
       table.appendChild(headTrs);
     }
 
-    for (key in el.show) {
+    for (let key in el.show) {
       let val = el.show[key];
 
       if (thValue.has(key)) {
         if (!index) {
-          createCell(headTrs, key, get, "th");
+          createCell(headTrs, key, val, get, "th");
         }
         if (key == "rating") {
-          createCell(tr, val.average);
+          createCell(tr, key, val.average, get, 'td');
         } else {
-          createCell(tr, val);
+          createCell(tr, key, val, get, 'td');
         }
       }
     }
@@ -116,27 +142,31 @@ async function parseGet(searchV = search.value, get) {
   text.appendChild(table);
 }
 
-function createCell(par, val = "-", data = false, child = "td") {
+function createCell(par, key, val = " - ", data, child = "td") {
   let td = document.createElement(child);
-  if (data) {
+  if (child==='th') {
     // td.innerHTML = val.toUpperCase()
     let head = document.createElement("div");
-    head.innerHTML = val.toUpperCase();
+    head.innerHTML = key.toUpperCase();
     td.appendChild(head);
 
-    if (toSort.has(val)) {
-      if (val === "name") {
+    if (toSort.has(key)) {
+      if (key === "name") {
         if (sortNameUp) {
           // sortVectName.innerHTML='Z'
           addEvent(() => {
             sortVectName.innerHTML = " A-Z";
-            sortData(val, data, true);
+            console.log('name T',key)
+            sortData(key, data, true);
+
           });
           sortNameUp = false;
         } else {
           addEvent(() => {
             sortVectName.innerHTML = " Z-A";
-            sortData(val, data);
+            console.log('name F',key)
+            sortData(key, data, false);
+
           });
           sortNameUp = true;
         }
@@ -144,17 +174,19 @@ function createCell(par, val = "-", data = false, child = "td") {
         // td.appendChild(sortVectName)
         head.appendChild(sortVectName);
       }
-      if (val === "rating") {
+      if (key === "rating") {
         if (sortRating) {
           addEvent(() => {
-            sortVectRating.innerHTML = " V";
-            sortData(val, data, true);
+            sortVectRating.innerHTML = "&#9660";;
+            console.log('ratuing T',key)
+            sortData(key, data, true);
           });
           sortRating = false;
         } else {
           addEvent(() => {
-            sortVectRating.innerHTML = " ^";
-            sortData(val, data);
+            sortVectRating.innerHTML = "&#9650;";
+            console.log('ratuing F',key)
+            sortData(key, data, false);
           });
           sortRating = true;
         }
@@ -163,15 +195,32 @@ function createCell(par, val = "-", data = false, child = "td") {
       }
     }
   } else {
-    td.innerHTML = val; //func to new request
+      if (key === "name"){
+        addEvent(()=> {
+          openModal(modalIsOpen, key, val, data)
+        })
+        if(modalIsOpen){
+          modalIsOpen==false
+        }
+        else{
+          modalIsOpen==true
+        }
+      }
+      if(val === null){
+        td.innerHTML = "&#8722;"
+        // console.log(val)
+      } 
+      else {
+          td.innerHTML = val;
+      }
   }
   par.appendChild(td);
-  par.addEventListener("click", function() {
-    let modal = document.createElement("div");
-    let off = document.createElement("div");
-    document.body.appendChild(modal);
-    document.body.appendChild(off);
-  });
+  // par.addEventListener("click", function() {
+  //   let modal = document.createElement("div");
+  //   let off = document.createElement("div");
+  //   document.body.appendChild(modal);
+  //   document.body.appendChild(off);
+  // });
 
   function addEvent(func, element = td) {
     element.addEventListener("click", function() {
@@ -180,20 +229,43 @@ function createCell(par, val = "-", data = false, child = "td") {
   }
 }
 
-function sortData(val, data, sortHigh = false) {
-  if (sortHigh) {
+function sortData(key, data, sortHigh = false) {
     data.sort(compareNumeric);
     function compareNumeric(a, b) {
-      if (val == "name") {
+      if (key === "name") {
+        console.log('Sort name T',key)
         if (a.show.name > b.show.name) return 1;
         if (a.show.name < b.show.name) return -1;
       } else {
+        console.log('Sort rating T',key)
         if (a.show.rating.average > b.show.rating.average) return 1;
         if (a.show.rating.average < b.show.rating.average) return -1;
       }
     }
-  } else {
+  if (!sortHigh) {
+    data.sort(compareNumeric);
+    console.log('Sort false',key)
     data.reverse();
   }
   parseGet(null, data);
 }
+
+async function openModal(modalIsOpen, keys, val, data){
+  modal.innerHTML = null
+  let modalInf = await jsonFetch("http://api.tvmaze.com/singlesearch/shows?q="+val)
+  // if( ){}
+  for(key in modalInf){
+    modal.innerHTML+= key+" "+ modalInf[key];
+    if(key === "image"){
+      console.log(modalInf[key].medium)
+      img.style.backgroundImage = 'url('+modalInf[key].medium+') '
+      img.style.backgroundRepeat= 'no-repeat'
+      img.style.height = '200px'
+      img.style.width = '300px'
+modal.appendChild(img)
+
+    }
+  }
+  // document.body.appendChild(modal)
+}
+
